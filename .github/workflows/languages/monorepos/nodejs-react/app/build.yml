@@ -1,0 +1,38 @@
+# Name workflow in pipeline
+name: (Monorepo - NodeJS and ReactJS) Build app
+
+# Workflow sharing policy
+on:
+  workflow_call:
+    inputs:
+      call_runner_image:
+        description: 'Declare image runner to steps'
+        required: true
+        type: string
+      call_action_checkout_version:
+        description: 'Version of actions/checkout to use'
+        required: true
+        type: string
+      call_action_harden_version:
+        description: 'Version of actions/harden-runner to use'
+        required: true
+        type: string
+      call_clean_workspace:
+        description: 'Enable to start a job cleanup before checkout repository'
+        required: true
+        type: boolean
+
+jobs:
+  # Clean and checkout repositories. Clean workspace is enabled by default
+  call_build_app:
+    name: Build app
+    runs-on: ${{ inputs.call_runner_image }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@'${{ inputs.call_action_harden_version }}'
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@'${{ inputs.call_action_checkout_version }}'
+        clean: ${{ inputs.call_clean_workspace }}

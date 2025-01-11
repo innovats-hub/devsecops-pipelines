@@ -1,0 +1,8 @@
+# Name workflow in pipeline
+name: (Global - DevSecOps) Notify status pipeline
+
+# Workflow sharing policy
+on:
+  workflow_call:
+
+# Pending development...

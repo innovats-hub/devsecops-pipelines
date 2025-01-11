@@ -1,0 +1,35 @@
+# Name workflow in pipeline
+name: (Global - DevSecOps) Source validate PRs
+
+# Workflow sharing policy
+on:
+  workflow_call:
+    inputs:
+      call_runner_image:
+        description: 'Declare image runner to steps'
+        required: true
+        type: string
+      call_action_harden_version:
+        description: 'Version of actions/harden-runner to use'
+        required: true
+        type: string
+
+jobs:
+  # Validation of source branches for PRs, only "release" and "hotfix" for master will be allowed
+  call_validate_branch:
+    name: Validate Source Branch
+    runs-on: ${{ inputs.call_runner_image }}
+    if: github.event_name == 'pull_request' && github.base_ref == 'master'
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@'${{ inputs.call_action_harden_version }}'
+        with:
+          egress-policy: audit
+          
+      - name: Check source branch
+        run: |
+          BRANCH_NAME=${{ github.head_ref }}
+          if [[ ! $BRANCH_NAME =~ ^(release|hotfix)\/.*$ ]]; then
+            echo "PRs to master are only allowed from release/* or hotfix/* branches. Current branch is: $BRANCH_NAME"
+            exit 1
+          fi

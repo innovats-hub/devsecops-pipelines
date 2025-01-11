@@ -1,0 +1,67 @@
+name: (Monorepo - NodeJS and ReactJS) pipeline base CI
+
+# Policies run job in branches
+on:
+  workflow_call:
+    inputs:
+      action_checkout_version:
+        description: 'Version of actions/checkout to use'
+        required: true
+        default: 'v4'
+        type: string
+      action_harden_version:
+        description: 'Version of actions/harden-runner to use'
+        required: true
+        default: 'v2'
+        type: string
+      clean_workspace:
+        description: 'Enable to start a job cleanup before checkout repository'
+        default: true
+        required: true
+        type: boolean
+
+      # install_deps
+      runner_image_job_install_deps:
+        description: 'Declare image runner to steps'
+        required: true
+        type: string
+
+      # build_app
+      runner_image_job_build_app:
+        description: 'Declare image runner to steps'
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # # Workflow reference => (Global - DevSecOps) Notify status pipeline
+  # notify_init:
+  #   uses: ./.github/workflows/validate/notify-status.yml
+  #   with:
+  #     call_runner_image: "${{ inputs.runner_image_job_notify }}"
+  #     call_action_checkout_version: "${{ inputs.action_checkout_version }}"
+  #     call_action_harden_version: "${{ inputs.action_harden_version }}"
+  #     call_clean_workspace: "${{ inputs.clean_workspace }}"
+
+  # Workflow reference => (Monorepo - NodeJS and ReactJS) Install deps and Lint
+  install_deps:
+    uses: ./.github/workflows/languages/monorepos/nodejs-reactjs/app/install.yml
+    with:
+      call_runner_image: "${{ inputs.runner_image_job_install_deps }}"
+      call_action_checkout_version: "${{ inputs.action_checkout_version }}"
+      call_action_harden_version: "${{ inputs.action_harden_version }}"
+      call_clean_workspace: "${{ inputs.clean_workspace }}"
+
+  # Workflow reference => (Monorepo - NodeJS and ReactJS) Build app
+  build_app:
+    uses: ./.github/workflows/languages/monorepos/nodejs-reactjs/app/build.yml
+    with:
+      call_runner_image: "${{ inputs.runner_image_job_build_app }}"
+      call_action_checkout_version: "${{ inputs.action_checkout_version }}"
+      call_action_harden_version: "${{ inputs.action_harden_version }}"
+      call_clean_workspace: "${{ inputs.clean_workspace }}"
+    needs:
+      - install_deps
