@@ -14,11 +14,6 @@ on:
         required: true
         default: 'v2'
         type: string
-      clean_workspace:
-        description: 'Enable to start a job cleanup before checkout repository'
-        default: true
-        required: true
-        type: boolean
 
       # install_deps
       runner_image_job_install_deps:
@@ -44,24 +39,21 @@ jobs:
   #     call_runner_image: "${{ inputs.runner_image_job_notify }}"
   #     call_action_checkout_version: "${{ inputs.action_checkout_version }}"
   #     call_action_harden_version: "${{ inputs.action_harden_version }}"
-  #     call_clean_workspace: "${{ inputs.clean_workspace }}"
 
   # Workflow reference => (Monorepo - NodeJS and ReactJS) Install deps and Lint
   install_deps:
-    uses: ./.github/workflows/languages/monorepos/nodejs-reactjs/app/install.yml
+    uses: ./.github/workflows/install.yml
     with:
       call_runner_image: "${{ inputs.runner_image_job_install_deps }}"
       call_action_checkout_version: "${{ inputs.action_checkout_version }}"
       call_action_harden_version: "${{ inputs.action_harden_version }}"
-      call_clean_workspace: "${{ inputs.clean_workspace }}"
 
   # Workflow reference => (Monorepo - NodeJS and ReactJS) Build app
   build_app:
-    uses: ./.github/workflows/languages/monorepos/nodejs-reactjs/app/build.yml
+    uses: ./.github/workflows/build.yml
     with:
       call_runner_image: "${{ inputs.runner_image_job_build_app }}"
       call_action_checkout_version: "${{ inputs.action_checkout_version }}"
       call_action_harden_version: "${{ inputs.action_harden_version }}"
-      call_clean_workspace: "${{ inputs.clean_workspace }}"
     needs:
       - install_deps

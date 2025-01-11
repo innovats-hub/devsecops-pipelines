@@ -17,10 +17,6 @@ on:
         description: 'Version of actions/harden-runner to use'
         required: true
         type: string
-      call_clean_workspace:
-        description: 'Enable to start a job cleanup before checkout repository'
-        required: true
-        type: boolean
 
 jobs:
   # Clean and checkout repositories. Clean workspace is enabled by default
@@ -35,4 +31,3 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@'${{ inputs.call_action_checkout_version }}'
-        clean: ${{ inputs.call_clean_workspace }}
