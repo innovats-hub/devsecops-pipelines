@@ -45,9 +45,10 @@ jobs:
       reusable_node_version: "${{ inputs.node_version_install_deps }}"
 
   # Workflow reference => (Monorepo - NodeJS and ReactJS) Build app
-  # build_app:
-  #   uses: ./.github/workflows/build.yml
-  #   with:
-  #     call_runner_image: "${{ inputs.runner_image_job_build_app }}"
-  #   needs:
-  #     - install_deps
+  build_app:
+    name: "DevSecOps - Build App"
+    uses: ./.github/workflows/build.yml
+    with:
+      reusable_runner_image: "${{ inputs.runner_image_job_build_app }}"
+    needs:
+      - install_deps
