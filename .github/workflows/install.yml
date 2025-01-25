@@ -42,9 +42,9 @@ jobs:
 
       - name: Verify value package manager
         run: |
-          if [[ "${{ inputs.reusable_package_manager }}" == "yarn" ]]; then
+          if [[ "${{ inputs.reusable_package_manager }}" == 'yarn' ]]; then
             echo "Install packages with Yarn..."
-          elif [[ "${{ inputs.reusable_package_manager }}" == "npm" ]]; then
+          elif [[ "${{ inputs.reusable_package_manager }}" == 'npm' ]]; then
             echo "Install packages with npm..."
           else
             echo "Invalid package manager specified. Please use 'npm' or 'yarn'."
@@ -53,9 +53,9 @@ jobs:
 
   # Installation of dependencies via npm for building the application
   reusable_npm_install_dependencies:
+    if: ${{ inputs.reusable_package_manager }} == 'npm'
     name: Node Install dependencies
     runs-on: ${{ inputs.reusable_runner_image }}
-    if: ${{ inputs.reusable_package_manager }} == "npm"
     needs:
       - reusable_config_environment
     steps:
@@ -87,9 +87,9 @@ jobs:
 
   # Installation of dependencies via yarn for building the application
   reusable_yarn_install_dependencies:
+    if: ${{ inputs.reusable_package_manager }} == 'yarn'
     name: Node Install dependencies
     runs-on: ${{ inputs.reusable_runner_image }}
-    if: ${{ inputs.reusable_package_manager }} == "yarn"
     needs:
       - reusable_config_environment
     steps:
