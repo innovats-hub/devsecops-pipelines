@@ -13,7 +13,6 @@ on:
       package_manager_job_install_deps:
         description: 'Declare image runner to steps'
         required: true
-        default: "npm"
         type: string
 
       # build_app
