@@ -46,9 +46,9 @@ jobs:
 
       - name: Verify value package manager
         run: |
-          if [[ "${{ github.event.inputs.reusable_package_manager }}" == "yarn" ]]; then
+          if [[ "${{ inputs.reusable_package_manager }}" == "yarn" ]]; then
             echo "Install packages with Yarn..."
-          elif [[ "${{ github.event.inputs.reusable_package_manager }}" == "npm" ]]; then
+          elif [[ "${{ inputs.reusable_package_manager }}" == "npm" ]]; then
             echo "Install packages with npm..."
           else
             echo "Invalid package manager specified. Please use 'npm' or 'yarn'."
