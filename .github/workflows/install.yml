@@ -33,7 +33,7 @@ on:
 jobs:
   # Specific environment settings
   reusable_config_environment:
-    name: Configure environment
+    name: "Configure environment"
     runs-on: ${{ inputs.reusable_runner_image }}
     steps:
       - name: Harden Runner

@@ -36,7 +36,7 @@ jobs:
 
   # Workflow reference => (Monorepo - NodeJS and ReactJS) Install deps and Lint
   install_deps:
-    name: Dependencies install
+    name: "DevSecOps - Dependencies install"
     uses: ./.github/workflows/install.yml
     with:
       reusable_runner_image: "${{ inputs.runner_image_job_install_deps }}"
