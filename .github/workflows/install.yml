@@ -51,9 +51,8 @@ jobs:
             exit 1
           fi
 
-  # Installation of dependencies via npm for building the application
-  reusable_npm_install_dependencies:
-    if: ${{ inputs.reusable_package_manager }} == 'npm'
+  # Installation of dependencies for building the application
+  reusable_install_dependencies:
     name: Node Install dependencies
     runs-on: ${{ inputs.reusable_runner_image }}
     needs:
@@ -67,13 +66,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: use node.js ${{ inputs.reusable_node_version }}
+      - name: use node.js ${{ inputs.reusable_node_version }} (npm)
+        if: ${{ inputs.reusable_package_manager }} == 'npm'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.reusable_node_version }}
           cache: npm
 
-      - name: Cache dependencies NPM
+      - name: use node.js ${{ inputs.reusable_node_version }} (yarn)
+        if: ${{ inputs.reusable_package_manager }} == 'yarn'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.reusable_node_version }}
+          cache: yarn
+
+      - name: Cache dependencies (npm)
+        if: ${{ inputs.reusable_package_manager }} == 'npm'
         uses: actions/cache@v4
         id: npm-cache
         with:
@@ -82,32 +90,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Install dependencies
-        run: npm install ${{ inputs.reusable_npm_install_args }}
-
-  # Installation of dependencies via yarn for building the application
-  reusable_yarn_install_dependencies:
-    if: ${{ inputs.reusable_package_manager }} == 'yarn'
-    name: Node Install dependencies
-    runs-on: ${{ inputs.reusable_runner_image }}
-    needs:
-      - reusable_config_environment
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@v2
-        with:
-          egress-policy: audit
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: use node.js ${{ inputs.reusable_node_version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ inputs.reusable_node_version }}
-          cache: yarn
-
-      - name: Cache dependencies YARN
+      - name: Cache dependencies (yarn)
+        if: ${{ inputs.reusable_package_manager }} == 'yarn'
         uses: actions/cache@v4
         id: yarn-cache
         with:
@@ -116,7 +100,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Install dependencies
+      - name: Install dependencies (npm)
+        if: ${{ inputs.reusable_package_manager }} == 'npm'
+        run: npm install ${{ inputs.reusable_npm_install_args }}
+
+      - name: Install dependencies (yarn)
+        if: ${{ inputs.reusable_package_manager }} == 'yarn'
         run: yarn install ${{ inputs.reusable_yarn_install_args }}
 
   # Code Syntax Validations
