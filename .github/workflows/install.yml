@@ -55,7 +55,7 @@ jobs:
   reusable_npm_install_dependencies:
     name: Node Install dependencies
     runs-on: ${{ inputs.reusable_runner_image }}
-    if: inputs.reusable_package_manager == "npm"
+    if: ${{ inputs.reusable_package_manager }} == "npm"
     needs:
       - reusable_config_environment
     steps:
@@ -89,7 +89,7 @@ jobs:
   reusable_yarn_install_dependencies:
     name: Node Install dependencies
     runs-on: ${{ inputs.reusable_runner_image }}
-    if: inputs.reusable_package_manager == "yarn"
+    if: ${{ inputs.reusable_package_manager }} == "yarn"
     needs:
       - reusable_config_environment
     steps:
