@@ -86,9 +86,9 @@ jobs:
         id: npm-cache
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ github.run_id }}-npm-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ github.ref }}-${{ github.run_id }}-node-
 
       - name: Cache dependencies (yarn)
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
@@ -96,9 +96,9 @@ jobs:
         id: yarn-cache
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ github.run_id }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
+            ${{ github.ref }}-${{ github.run_id }}-yarn-
 
       - name: Install dependencies (npm)
         if: ${{ inputs.reusable_package_manager == 'npm' }}
