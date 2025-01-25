@@ -13,22 +13,18 @@ on:
         description: 'Declare the package manager as used, yarn or npm'
         required: true
         type: string
-      # reusable_action_setup_node_version:
-      #   description: 'Version of actions/setup-node to use'
-      #   required: true
-      #   type: string
-      # reusable_node_version:
-      #   description: 'Version of nodeJS to use'
-      #   required: true
-      #   type: string
-      # reusable_npm_install_args:
-      #   description: 'Arguments of yarn install to use'
-      #   required: false
-      #   type: string
-      # reusable_yarn_install_args:
-      #   description: 'Arguments of yarn install to use'
-      #   required: false
-      #   type: string
+      reusable_node_version:
+        description: 'Version of nodeJS to use'
+        required: true
+        type: string
+      reusable_npm_install_args:
+        description: 'Arguments of yarn install to use'
+        required: false
+        type: string
+      reusable_yarn_install_args:
+        description: 'Arguments of yarn install to use'
+        required: false
+        type: string
 
 jobs:
   # Specific environment settings
@@ -55,83 +51,83 @@ jobs:
             exit 1
           fi
 
-  # # Installation of dependencies via npm for building the application
-  # call_npm_install_dependencies:
-  #   name: Node Install dependencies
-  #   runs-on: ${{ inputs.call_runner_image }}
-  #   if: github.event.inputs.package_manager == "npm"
-  #   needs:
-  #     - call_config_environment
-  #   steps:
-  #     - name: Harden Runner
-  #       uses: step-security/harden-runner@'${{ inputs.call_action_harden_version }}'
-  #       with:
-  #         egress-policy: audit
+  # Installation of dependencies via npm for building the application
+  reusable_npm_install_dependencies:
+    name: Node Install dependencies
+    runs-on: ${{ inputs.reusable_runner_image }}
+    if: inputs.reusable_package_manager == "npm"
+    needs:
+      - reusable_config_environment
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
 
-  #     - name: Checkout repository
-  #       uses: actions/checkout@'${{ inputs.call_action_checkout_version }}'
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  #     - name: use node.js ${{ inputs.call_node_version }}
-  #       uses: actions/setup-node@'${{ inputs.call_action_setup_node_version }}'
-  #       with:
-  #         node-version: ${{ inputs.call_node_version }}
-  #         cache: npm
+      - name: use node.js ${{ inputs.reusable_node_version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.reusable_node_version }}
+          cache: npm
 
-  #     - name: Cache dependencies NPM
-  #       uses: actions/cache@v4
-  #       id: npm-cache
-  #       with:
-  #         path: '**/node_modules'
-  #         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-node-
+      - name: Cache dependencies NPM
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-  #     - name: Install dependencies
-  #       run: npm install ${{ inputs.call_npm_install_args }}
+      - name: Install dependencies
+        run: npm install ${{ inputs.reusable_npm_install_args }}
 
-  # # Installation of dependencies via yarn for building the application
-  # call_yarn_install_dependencies:
-  #   name: Node Install dependencies
-  #   runs-on: ${{ inputs.call_runner_image }}
-  #   if: github.event.inputs.package_manager == "yarn"
-  #   needs:
-  #     - call_config_environment
-  #   steps:
-  #     - name: Harden Runner
-  #       uses: step-security/harden-runner@'${{ inputs.call_action_harden_version }}'
-  #       with:
-  #         egress-policy: audit
+  # Installation of dependencies via yarn for building the application
+  reusable_yarn_install_dependencies:
+    name: Node Install dependencies
+    runs-on: ${{ inputs.reusable_runner_image }}
+    if: inputs.reusable_package_manager == "yarn"
+    needs:
+      - reusable_config_environment
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
 
-  #     - name: Checkout repository
-  #       uses: actions/checkout@'${{ inputs.call_action_checkout_version }}'
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  #     - name: use node.js ${{ inputs.call_node_version }}
-  #       uses: actions/setup-node@'${{ inputs.call_action_setup_node_version }}'
-  #       with:
-  #         node-version: ${{ inputs.call_node_version }}
-  #         cache: yarn
+      - name: use node.js ${{ inputs.reusable_node_version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.reusable_node_version }}
+          cache: yarn
 
-  #     - name: Cache dependencies YARN
-  #       uses: actions/cache@v4
-  #       id: yarn-cache
-  #       with:
-  #         path: '**/node_modules'
-  #         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-yarn-
+      - name: Cache dependencies YARN
+        uses: actions/cache@v4
+        id: yarn-cache
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
-  #     - name: Install dependencies
-  #       run: yarn install ${{ inputs.call_yarn_install_args }}
+      - name: Install dependencies
+        run: yarn install ${{ inputs.reusable_yarn_install_args }}
 
   # Code Syntax Validations
-  # call_lint:
+  # reusable_lint:
   #   name: Lint
-  #   runs-on: ${{ inputs.call_runner_image }}
+  #   runs-on: ${{ inputs.reusable_runner_image }}
   #   steps:
   #     - name: Harden Runner
-  #       uses: step-security/harden-runner@'${{ inputs.call_action_harden_version }}'
+  #       uses: step-security/harden-runner@v2
   #       with:
   #         egress-policy: audit
 
   #     - name: Checkout repository
-  #       uses: actions/checkout@'${{ inputs.call_action_checkout_version }}'
+  #       uses: actions/checkout@v4

@@ -15,6 +15,11 @@ on:
         required: true
         type: string
 
+      node_version_install_deps:
+        description: 'Version of nodeJS to use'
+        required: true
+        type: string
+
       # build_app
       runner_image_job_build_app:
         description: 'Declare image runner to steps'
@@ -41,6 +46,7 @@ jobs:
     with:
       reusable_runner_image: "${{ inputs.runner_image_job_install_deps }}"
       reusable_package_manager: "${{ inputs.package_manager_job_install_deps }}"
+      reusable_node_version: "${{ inputs.node_version_install_deps }}"
 
   # Workflow reference => (Monorepo - NodeJS and ReactJS) Build app
   # build_app:
