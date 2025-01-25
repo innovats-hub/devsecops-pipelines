@@ -11,14 +11,16 @@ on:
         type: string
       call_action_checkout_version:
         description: 'Version of actions/checkout to use'
-        required: true
         type: string
       call_action_harden_version:
         description: 'Version of actions/harden-runner to use'
-        required: true
         type: string
       call_action_setup_node_version:
         description: 'Version of actions/setup-node to use'
+        required: true
+        type: string
+      call_node_version:
+        description: 'Version of nodeJS to use'
         required: true
         type: string
       call_npm_install_args:
@@ -55,73 +57,73 @@ jobs:
             exit 1
           fi
 
-  # Installation of dependencies via npm for building the application
-  call_npm_install_dependencies:
-    name: Node Install dependencies
-    runs-on: ${{ inputs.call_runner_image }}
-    if: github.event.inputs.package_manager == "npm"
-    needs:
-      - call_config_environment
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@'${{ inputs.call_action_harden_version }}'
-        with:
-          egress-policy: audit
+  # # Installation of dependencies via npm for building the application
+  # call_npm_install_dependencies:
+  #   name: Node Install dependencies
+  #   runs-on: ${{ inputs.call_runner_image }}
+  #   if: github.event.inputs.package_manager == "npm"
+  #   needs:
+  #     - call_config_environment
+  #   steps:
+  #     - name: Harden Runner
+  #       uses: step-security/harden-runner@'${{ inputs.call_action_harden_version }}'
+  #       with:
+  #         egress-policy: audit
 
-      - name: Checkout repository
-        uses: actions/checkout@'${{ inputs.call_action_checkout_version }}'
+  #     - name: Checkout repository
+  #       uses: actions/checkout@'${{ inputs.call_action_checkout_version }}'
 
-      - name: use node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@'${{ inputs.call_action_setup_node_version }}'
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
+  #     - name: use node.js ${{ inputs.call_node_version }}
+  #       uses: actions/setup-node@'${{ inputs.call_action_setup_node_version }}'
+  #       with:
+  #         node-version: ${{ inputs.call_node_version }}
+  #         cache: npm
 
-      - name: Cache dependencies NPM
-        uses: actions/cache@v4
-        id: npm-cache
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+  #     - name: Cache dependencies NPM
+  #       uses: actions/cache@v4
+  #       id: npm-cache
+  #       with:
+  #         path: '**/node_modules'
+  #         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-node-
 
-      - name: Install dependencies
-        run: npm install ${{ inputs.call_npm_install_args }}
+  #     - name: Install dependencies
+  #       run: npm install ${{ inputs.call_npm_install_args }}
 
-  # Installation of dependencies via yarn for building the application
-  call_yarn_install_dependencies:
-    name: Node Install dependencies
-    runs-on: ${{ inputs.call_runner_image }}
-    if: github.event.inputs.package_manager == "yarn"
-    needs:
-      - call_config_environment
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@'${{ inputs.call_action_harden_version }}'
-        with:
-          egress-policy: audit
+  # # Installation of dependencies via yarn for building the application
+  # call_yarn_install_dependencies:
+  #   name: Node Install dependencies
+  #   runs-on: ${{ inputs.call_runner_image }}
+  #   if: github.event.inputs.package_manager == "yarn"
+  #   needs:
+  #     - call_config_environment
+  #   steps:
+  #     - name: Harden Runner
+  #       uses: step-security/harden-runner@'${{ inputs.call_action_harden_version }}'
+  #       with:
+  #         egress-policy: audit
 
-      - name: Checkout repository
-        uses: actions/checkout@'${{ inputs.call_action_checkout_version }}'
+  #     - name: Checkout repository
+  #       uses: actions/checkout@'${{ inputs.call_action_checkout_version }}'
 
-      - name: use node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@'${{ inputs.call_action_setup_node_version }}'
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: yarn
+  #     - name: use node.js ${{ inputs.call_node_version }}
+  #       uses: actions/setup-node@'${{ inputs.call_action_setup_node_version }}'
+  #       with:
+  #         node-version: ${{ inputs.call_node_version }}
+  #         cache: yarn
 
-      - name: Cache dependencies YARN
-        uses: actions/cache@v4
-        id: yarn-cache
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+  #     - name: Cache dependencies YARN
+  #       uses: actions/cache@v4
+  #       id: yarn-cache
+  #       with:
+  #         path: '**/node_modules'
+  #         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-yarn-
 
-      - name: Install dependencies
-        run: yarn install ${{ inputs.call_yarn_install_args }}
+  #     - name: Install dependencies
+  #       run: yarn install ${{ inputs.call_yarn_install_args }}
 
   # Code Syntax Validations
   # call_lint:

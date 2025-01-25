@@ -11,11 +11,9 @@ on:
         type: string
       call_action_checkout_version:
         description: 'Version of actions/checkout to use'
-        required: true
         type: string
       call_action_harden_version:
         description: 'Version of actions/harden-runner to use'
-        required: true
         type: string
 
 jobs:
