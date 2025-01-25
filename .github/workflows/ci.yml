@@ -4,19 +4,16 @@ name: (Monorepo - NodeJS and ReactJS) pipeline base CI
 on:
   workflow_call:
     inputs:
-      action_checkout_version:
-        description: 'Version of actions/checkout to use'
-        default: 'v4'
-        type: string
-      action_harden_version:
-        description: 'Version of actions/harden-runner to use'
-        default: 'v2'
-        type: string
-
       # install_deps
       runner_image_job_install_deps:
         description: 'Declare image runner to steps'
         required: true
+        type: string
+
+      package_manager_job_install_deps:
+        description: 'Declare image runner to steps'
+        required: true
+        default: "npm"
         type: string
 
       # build_app
@@ -25,9 +22,9 @@ on:
         required: true
         type: string
 
-# concurrency:
-#   group: ${{ github.workflow }}-${{ github.ref }}
-#   cancel-in-progress: true
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # # Workflow reference => (Global - DevSecOps) Notify status pipeline
@@ -40,18 +37,16 @@ jobs:
 
   # Workflow reference => (Monorepo - NodeJS and ReactJS) Install deps and Lint
   install_deps:
+    name: Dependencies install
     uses: ./.github/workflows/install.yml
     with:
-      call_runner_image: "${{ inputs.runner_image_job_install_deps }}"
-      # call_action_checkout_version: "${{ inputs.action_checkout_version }}"
-      # call_action_harden_version: "${{ inputs.action_harden_version }}"
+      reusable_runner_image: "${{ inputs.runner_image_job_install_deps }}"
+      reusable_package_manager: "${{ inputs.package_manager_job_install_deps }}"
 
   # Workflow reference => (Monorepo - NodeJS and ReactJS) Build app
   # build_app:
   #   uses: ./.github/workflows/build.yml
   #   with:
   #     call_runner_image: "${{ inputs.runner_image_job_build_app }}"
-  #     call_action_checkout_version: "${{ inputs.action_checkout_version }}"
-  #     call_action_harden_version: "${{ inputs.action_harden_version }}"
   #   needs:
   #     - install_deps

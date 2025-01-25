@@ -5,36 +5,34 @@ name: (Monorepo - NodeJS and ReactJS) Install deps and Lint
 on:
   workflow_call:
     inputs:
-      call_runner_image:
+      reusable_runner_image:
         description: 'Declare image runner to steps'
         required: true
         type: string
-      # call_action_checkout_version:
-      #   description: 'Version of actions/checkout to use'
-      #   type: string
-      # call_action_harden_version:
-      #   description: 'Version of actions/harden-runner to use'
-      #   type: string
-      # call_action_setup_node_version:
+      reusable_package_manager:
+        description: 'Declare the package manager as used, yarn or npm'
+        required: true
+        type: string
+      # reusable_action_setup_node_version:
       #   description: 'Version of actions/setup-node to use'
       #   required: true
       #   type: string
-      # call_node_version:
+      # reusable_node_version:
       #   description: 'Version of nodeJS to use'
       #   required: true
       #   type: string
-      # call_npm_install_args:
+      # reusable_npm_install_args:
       #   description: 'Arguments of yarn install to use'
       #   required: false
       #   type: string
-      # call_yarn_install_args:
+      # reusable_yarn_install_args:
       #   description: 'Arguments of yarn install to use'
       #   required: false
       #   type: string
 
 jobs:
   # Specific environment settings
-  call_config_environment:
+  reusable_config_environment:
     name: Configure environment
     runs-on: ${{ inputs.call_runner_image }}
     steps:
@@ -48,9 +46,9 @@ jobs:
 
       - name: Verify value package manager
         run: |
-          if [[ "${{ github.event.inputs.package_manager }}" == "yarn" ]]; then
+          if [[ "${{ github.event.inputs.reusable_package_manager }}" == "yarn" ]]; then
             echo "Install packages with Yarn..."
-          elif [[ "${{ github.event.inputs.package_manager }}" == "npm" ]]; then
+          elif [[ "${{ github.event.inputs.reusable_package_manager }}" == "npm" ]]; then
             echo "Install packages with npm..."
           else
             echo "Invalid package manager specified. Please use 'npm' or 'yarn'."
