@@ -22,7 +22,7 @@ on:
       job_install_reusable_install_args:
         description: 'Arguments of install to use'
         required: false
-        default: ""
+        default: "install"
         type: string
 
       # build_app
@@ -30,10 +30,9 @@ on:
         description: 'Declare image runner to steps'
         required: true
         type: string
-      job_build_reusable_install_args:
+      job_build_reusable_build_args:
         description: 'Arguments of build to use'
-        required: false
-        default: ""
+        required: true
         type: string
 
 jobs:
@@ -63,6 +62,6 @@ jobs:
       reusable_runner_image: "${{ inputs.job_build_app_runner_image }}"
       reusable_package_manager: "${{ inputs.globals_package_manager }}"
       reusable_node_version: "${{ inputs.globals_node_version }}"
-      reusable_build_args: "${{ inputs.job_install_reusable_build_args }}"
+      reusable_build_args: "${{ inputs.job_build_reusable_build_args }}"
     needs:
       - install_deps

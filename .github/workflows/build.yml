@@ -19,7 +19,7 @@ on:
         type: string
       reusable_build_args:
         description: 'Arguments of build to use'
-        required: false
+        required: true
         type: string
 
 jobs:
@@ -70,8 +70,8 @@ jobs:
 
       - name: Build (npm)
         if: ${{ inputs.reusable_package_manager == 'npm' }}
-        run: npm build ${{ inputs.reusable_npm_build_args }}
+        run: "npm ${{ inputs.reusable_npm_build_args }}"
 
       - name: Build (yarn)
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
-        run: yarn build ${{ inputs.reusable_yarn_build_args }}
+        run: "yarn ${{ inputs.reusable_yarn_build_args }}"
