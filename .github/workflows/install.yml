@@ -67,21 +67,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: use node.js ${{ inputs.reusable_node_version }} (npm)
-        if: ${{ inputs.reusable_package_manager }} == 'npm'
+        if: ${{ inputs.reusable_package_manager == 'npm' }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.reusable_node_version }}
           cache: npm
 
       - name: use node.js ${{ inputs.reusable_node_version }} (yarn)
-        if: ${{ inputs.reusable_package_manager }} == 'yarn'
+        if: ${{ inputs.reusable_package_manager == 'yarn' }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.reusable_node_version }}
           cache: yarn
 
       - name: Cache dependencies (npm)
-        if: ${{ inputs.reusable_package_manager }} == 'npm'
+        if: ${{ inputs.reusable_package_manager == 'npm' }}
         uses: actions/cache@v4
         id: npm-cache
         with:
@@ -91,7 +91,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Cache dependencies (yarn)
-        if: ${{ inputs.reusable_package_manager }} == 'yarn'
+        if: ${{ inputs.reusable_package_manager == 'yarn' }}
         uses: actions/cache@v4
         id: yarn-cache
         with:
@@ -101,11 +101,11 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Install dependencies (npm)
-        if: ${{ inputs.reusable_package_manager }} == 'npm'
+        if: ${{ inputs.reusable_package_manager == 'npm' }}
         run: npm install ${{ inputs.reusable_npm_install_args }}
 
       - name: Install dependencies (yarn)
-        if: ${{ inputs.reusable_package_manager }} == 'yarn'
+        if: ${{ inputs.reusable_package_manager == 'yarn' }}
         run: yarn install ${{ inputs.reusable_yarn_install_args }}
 
   # Code Syntax Validations
