@@ -4,26 +4,36 @@ name: (Monorepo - NodeJS and ReactJS) pipeline base CI
 on:
   workflow_call:
     inputs:
-      # install_deps
-      runner_image_job_install_deps:
-        description: 'Declare image runner to steps'
-        required: true
-        type: string
-
-      package_manager_job_install_deps:
-        description: 'Declare image runner to steps'
-        required: true
-        type: string
-
-      node_version_install_deps:
+      # Globals
+      globals_node_version:
         description: 'Version of nodeJS to use'
         required: true
         type: string
-
-      # build_app
-      runner_image_job_build_app:
+      globals_package_manager:
         description: 'Declare image runner to steps'
         required: true
+        type: string
+
+      # install_deps
+      job_install_deps_runner_image:
+        description: 'Declare image runner to steps'
+        required: true
+        type: string
+      job_install_reusable_install_args:
+        description: 'Arguments of install to use'
+        required: false
+        default: ""
+        type: string
+
+      # build_app
+      job_build_app_runner_image:
+        description: 'Declare image runner to steps'
+        required: true
+        type: string
+      job_build_reusable_install_args:
+        description: 'Arguments of build to use'
+        required: false
+        default: ""
         type: string
 
 jobs:
@@ -40,15 +50,19 @@ jobs:
     name: "DevSecOps - Dependencies install"
     uses: ./.github/workflows/install.yml
     with:
-      reusable_runner_image: "${{ inputs.runner_image_job_install_deps }}"
-      reusable_package_manager: "${{ inputs.package_manager_job_install_deps }}"
-      reusable_node_version: "${{ inputs.node_version_install_deps }}"
+      reusable_runner_image: "${{ inputs.job_install_deps_runner_image }}"
+      reusable_package_manager: "${{ inputs.globals_package_manager }}"
+      reusable_node_version: "${{ inputs.globals_node_version }}"
+      reusable_install_args: "${{ inputs.job_install_reusable_install_args }}"
 
   # Workflow reference => (Monorepo - NodeJS and ReactJS) Build app
   build_app:
     name: "DevSecOps - Build App"
     uses: ./.github/workflows/build.yml
     with:
-      reusable_runner_image: "${{ inputs.runner_image_job_build_app }}"
+      reusable_runner_image: "${{ inputs.job_build_app_runner_image }}"
+      reusable_package_manager: "${{ inputs.globals_package_manager }}"
+      reusable_node_version: "${{ inputs.globals_node_version }}"
+      reusable_build_args: "${{ inputs.job_install_reusable_build_args }}"
     needs:
       - install_deps

@@ -17,12 +17,8 @@ on:
         description: 'Version of nodeJS to use'
         required: true
         type: string
-      reusable_npm_install_args:
-        description: 'Arguments of yarn install to use'
-        required: false
-        type: string
-      reusable_yarn_install_args:
-        description: 'Arguments of yarn install to use'
+      reusable_install_args:
+        description: 'Arguments of install to use'
         required: false
         type: string
 
@@ -53,7 +49,7 @@ jobs:
 
   # Installation of dependencies for building the application
   reusable_install_dependencies:
-    name: Node Install dependencies
+    name: Node install dependencies
     runs-on: ${{ inputs.reusable_runner_image }}
     needs:
       - reusable_config_environment
@@ -86,9 +82,9 @@ jobs:
         id: npm-cache
         with:
           path: '**/node_modules'
-          key: ${{ github.run_id }}-npm-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ github.run_id }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ github.ref }}-${{ github.run_id }}-node-
+            ${{ github.ref }}-${{ github.run_id }}-npm-
 
       - name: Cache dependencies (yarn)
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
@@ -102,11 +98,11 @@ jobs:
 
       - name: Install dependencies (npm)
         if: ${{ inputs.reusable_package_manager == 'npm' }}
-        run: npm install ${{ inputs.reusable_npm_install_args }}
+        run: npm install ${{ inputs.reusable_install_args }}
 
       - name: Install dependencies (yarn)
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
-        run: yarn install ${{ inputs.reusable_yarn_install_args }}
+        run: yarn install ${{ inputs.reusable_install_args }}
 
   # Code Syntax Validations
   # reusable_lint:
