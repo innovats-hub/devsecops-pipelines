@@ -34,7 +34,7 @@ jobs:
   # Specific environment settings
   reusable_config_environment:
     name: Configure environment
-    runs-on: ${{ inputs.call_runner_image }}
+    runs-on: ${{ inputs.reusable_runner_image }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@v2
