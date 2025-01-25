@@ -39,12 +39,12 @@ jobs:
     runs-on: ${{ inputs.call_runner_image }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@${{ inputs.call_action_harden_version }}
+        uses: step-security/harden-runner@v2
         with:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@${{ inputs.call_action_checkout_version }}
+        uses: actions/checkout@v4
 
       - name: Verify value package manager
         run: |
