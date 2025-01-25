@@ -43,8 +43,8 @@ jobs:
     uses: ./.github/workflows/install.yml
     with:
       call_runner_image: "${{ inputs.runner_image_job_install_deps }}"
-      call_action_checkout_version: "${{ inputs.action_checkout_version }}"
-      call_action_harden_version: "${{ inputs.action_harden_version }}"
+      # call_action_checkout_version: "${{ inputs.action_checkout_version }}"
+      # call_action_harden_version: "${{ inputs.action_harden_version }}"
 
   # Workflow reference => (Monorepo - NodeJS and ReactJS) Build app
   # build_app:
