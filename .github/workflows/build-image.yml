@@ -5,7 +5,7 @@ name: (Monorepo - NodeJS and ReactJS) Build image
 on:
   workflow_call:
     inputs:
-      reusable_runner_name:
+      reusable_runner_image:
         description: 'Declare runner name to steps'
         required: true
         type: string
@@ -18,10 +18,7 @@ jobs:
   # Clean and checkout repositories. Clean workspace is enabled by default
   reusable_build_image:
     name: Build container image
-    runs-on: ${{ inputs.reusable_runner_name }}
-    container:
-      image: quay.io/buildah/stable:latest
-      options: --security-opt seccomp=unconfined --cap-add all
+    runs-on: ${{ inputs.reusable_runner_image }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@v2
@@ -39,6 +36,12 @@ jobs:
       - name: Extract build (npm)
         run: |
           tar -xzf build.tar.gz
+
+      - name: Install Buildah
+        run: |
+          wget https://github.com/containers/buildah/releases/latest/download/buildah-linux-amd64 -O buildah
+          chmod +x buildah
+          sudo mv buildah /usr/local/bin/
 
       - name: Build image
         run: |

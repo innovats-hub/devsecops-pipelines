@@ -13,16 +13,12 @@ on:
         description: 'Declare the package manager as used, yarn or npm'
         required: true
         type: string
-      globals_runner_name:
-        description: 'Declare runner name to steps'
+      globals_runner_image:
+        description: 'Declare runner image to steps'
         required: true
         type: string
 
       # install_deps
-      job_install_deps_container_runner_image:
-        description: 'Declare container runner image to steps'
-        required: true
-        type: string
       job_install_deps_install_args:
         description: 'Arguments of install to use'
         required: false
@@ -30,10 +26,6 @@ on:
         type: string
 
       # build_app
-      job_build_app_container_runner_image:
-        description: 'Declare container runner image to steps'
-        required: true
-        type: string
       job_build_app_build_args:
         description: 'Arguments of build to use'
         required: true
@@ -45,8 +37,7 @@ jobs:
     name: "DevSecOps - Dependencies install"
     uses: ./.github/workflows/install.yml
     with:
-      reusable_runner_name: "${{ inputs.globals_runner_name }}"
-      reusable_container_runner_image: "${{ inputs.job_install_deps_container_runner_image }}"
+      reusable_runner_image: "${{ inputs.globals_runner_image }}"
       reusable_package_manager: "${{ inputs.globals_package_manager }}"
       reusable_node_version: "${{ inputs.globals_node_version }}"
 
@@ -55,8 +46,7 @@ jobs:
     name: "DevSecOps - Build App"
     uses: ./.github/workflows/build.yml
     with:
-      reusable_runner_name: "${{ inputs.globals_runner_name }}"
-      reusable_container_runner_image: "${{ inputs.job_build_app_container_runner_image }}"
+      reusable_runner_image: "${{ inputs.globals_runner_image }}"
       reusable_package_manager: "${{ inputs.globals_package_manager }}"
       reusable_node_version: "${{ inputs.globals_node_version }}"
       reusable_build_args: "${{ inputs.job_build_app_build_args }}"
@@ -68,7 +58,7 @@ jobs:
     name: "DevSecOps - Build Image"
     uses: ./.github/workflows/build-image.yml
     with:
-      reusable_runner_name: "${{ inputs.globals_runner_name }}"
+      reusable_runner_image: "${{ inputs.globals_runner_image }}"
       reusable_package_manager: "${{ inputs.globals_package_manager }}"
     needs:
       - build_app
