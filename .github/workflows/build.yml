@@ -77,7 +77,7 @@ jobs:
       - name: Build (yarn)
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
         run: |
-          yarn ${{ inputs.reusable_build_args }}"
+          yarn ${{ inputs.reusable_build_args }}
           tar -czf build.tar.gz build
 
       - name: Upload artifact build
