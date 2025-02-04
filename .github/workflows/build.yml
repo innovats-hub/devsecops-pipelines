@@ -17,7 +17,7 @@ on:
         description: 'Version of nodeJS to use'
         required: true
         type: string
-      reusable_build_path:
+      reusable_path_compress_build:
         description: 'Path of build to compress'
         required: false
         type: string
@@ -80,13 +80,13 @@ jobs:
         if: ${{ inputs.reusable_package_manager == 'npm' }}
         run: |
           npm ${{ inputs.reusable_build_args }}
-          tar -czf build.tar.gz ${{ inputs.reusable_build_path }}
+          tar -czf build.tar.gz ${{ inputs.reusable_path_compress_build }}
 
       - name: Build (yarn)
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
         run: |
           yarn ${{ inputs.reusable_build_args }}
-          tar -czf build.tar.gz ${{ inputs.reusable_build_path }}
+          tar -czf build.tar.gz ${{ inputs.reusable_path_compress_build }}
 
       - name: Upload artifact build
         uses: actions/upload-artifact@v4

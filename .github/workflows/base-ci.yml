@@ -26,7 +26,7 @@ on:
         type: string
 
       # build_app
-      job_build_app_build_path:
+      job_build_app_path_compress_build:
         description: 'Path of build to compress'
         required: false
         default: "build"
