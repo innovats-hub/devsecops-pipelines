@@ -17,6 +17,10 @@ on:
         description: 'Version of nodeJS to use'
         required: true
         type: string
+      reusable_build_path:
+        description: 'Path of build to compress'
+        required: false
+        type: string
       reusable_build_args:
         description: 'Arguments of build to use'
         required: true
@@ -54,7 +58,9 @@ jobs:
         if: ${{ inputs.reusable_package_manager == 'npm' }}
         uses: actions/cache@v4
         with:
-          path: '**/node_modules'
+          path: |
+            '**/node_modules'
+            '**/package-lock.json'
           key: ${{ github.run_id }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ github.ref }}-${{ github.run_id }}-npm-
@@ -63,7 +69,9 @@ jobs:
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
         uses: actions/cache@v4
         with:
-          path: '**/node_modules'
+          path: |
+            '**/node_modules'
+            '**/yarn.lock'
           key: ${{ github.run_id }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ github.ref }}-${{ github.run_id }}-yarn-
@@ -72,13 +80,13 @@ jobs:
         if: ${{ inputs.reusable_package_manager == 'npm' }}
         run: |
           npm ${{ inputs.reusable_build_args }}
-          tar -czf build.tar.gz build
+          tar -czf build.tar.gz ${{ inputs.reusable_build_path }}
 
       - name: Build (yarn)
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
         run: |
           yarn ${{ inputs.reusable_build_args }}
-          tar -czf build.tar.gz build
+          tar -czf build.tar.gz ${{ inputs.reusable_build_path }}
 
       - name: Upload artifact build
         uses: actions/upload-artifact@v4

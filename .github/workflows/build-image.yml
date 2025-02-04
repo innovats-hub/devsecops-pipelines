@@ -13,6 +13,10 @@ on:
         description: 'Declare the package manager as used, yarn or npm'
         required: true
         type: string
+      reusable_path_extract_build:
+        description: 'Path to extract the build'
+        required: false 
+        type: string
 
 jobs:
   # Clean and checkout repositories. Clean workspace is enabled by default
@@ -33,9 +37,9 @@ jobs:
         with:
           name: ${{ github.run_id }}-build-${{ github.sha }}
 
-      - name: Extract build (npm)
+      - name: Extract build
         run: |
-          tar -xzf build.tar.gz
+          tar -xzf build.tar.gz -C ${{ inputs.reusable_path_extract_build }}
 
       - name: Install Buildah
         run: |
