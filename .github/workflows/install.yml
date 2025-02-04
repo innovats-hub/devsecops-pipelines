@@ -5,8 +5,12 @@ name: (Monorepo - NodeJS and ReactJS) Install deps and Lint
 on:
   workflow_call:
     inputs:
-      reusable_runner_image:
-        description: 'Declare image runner to steps'
+      reusable_runner_name:
+        description: 'Declare runner name to steps'
+        required: true
+        type: string
+      reusable_container_runner_image:
+        description: 'Declare container runner image to steps'
         required: true
         type: string
       reusable_package_manager:
@@ -26,17 +30,20 @@ jobs:
   # Specific environment settings
   reusable_config_environment:
     name: "Configure environment"
-    runs-on: ${{ inputs.reusable_runner_image }}
+    runs-on: ${{ inputs.reusable_runner_name }}
+    container:
+      image: ${{ inputs.reusable_container_runner_image }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@v2
         with:
           egress-policy: audit
-
+          
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Verify value package manager
+        shell: bash
         run: |
           if [[ "${{ inputs.reusable_package_manager }}" == 'yarn' ]]; then
             echo "Install packages with Yarn..."
@@ -50,7 +57,9 @@ jobs:
   # Installation of dependencies for building the application
   reusable_install_dependencies:
     name: Node install dependencies
-    runs-on: ${{ inputs.reusable_runner_image }}
+    runs-on: ${{ inputs.reusable_runner_name }}
+    container:
+      image: ${{ inputs.reusable_container_runner_image }}
     needs:
       - reusable_config_environment
     steps:
@@ -98,21 +107,8 @@ jobs:
 
       - name: Install dependencies (npm)
         if: ${{ inputs.reusable_package_manager == 'npm' }}
-        run: "npm ${{ inputs.reusable_install_args }}"
+        run: "npm install ${{ inputs.reusable_install_args }}"
 
       - name: Install dependencies (yarn)
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
-        run: "yarn ${{ inputs.reusable_install_args }}"
-
-  # Code Syntax Validations
-  # reusable_lint:
-  #   name: Lint
-  #   runs-on: ${{ inputs.reusable_runner_image }}
-  #   steps:
-  #     - name: Harden Runner
-  #       uses: step-security/harden-runner@v2
-  #       with:
-  #         egress-policy: audit
-
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
+        run: "yarn install ${{ inputs.reusable_install_args }}"

@@ -10,58 +10,65 @@ on:
         required: true
         type: string
       globals_package_manager:
-        description: 'Declare image runner to steps'
+        description: 'Declare the package manager as used, yarn or npm'
+        required: true
+        type: string
+      globals_runner_name:
+        description: 'Declare runner name to steps'
         required: true
         type: string
 
       # install_deps
-      job_install_deps_runner_image:
-        description: 'Declare image runner to steps'
+      job_install_deps_container_runner_image:
+        description: 'Declare container runner image to steps'
         required: true
         type: string
-      job_install_reusable_install_args:
+      job_install_deps_install_args:
         description: 'Arguments of install to use'
         required: false
         default: "install"
         type: string
 
       # build_app
-      job_build_app_runner_image:
-        description: 'Declare image runner to steps'
+      job_build_app_container_runner_image:
+        description: 'Declare container runner image to steps'
         required: true
         type: string
-      job_build_reusable_build_args:
+      job_build_app_build_args:
         description: 'Arguments of build to use'
         required: true
         type: string
 
 jobs:
-  # # Workflow reference => (Global - DevSecOps) Notify status pipeline
-  # notify_init:
-  #   uses: ./.github/workflows/validate/notify-status.yml
-  #   with:
-  #     call_runner_image: "${{ inputs.runner_image_job_notify }}"
-  #     call_action_checkout_version: "${{ inputs.action_checkout_version }}"
-  #     call_action_harden_version: "${{ inputs.action_harden_version }}"
-
   # Workflow reference => (Monorepo - NodeJS and ReactJS) Install deps and Lint
   install_deps:
     name: "DevSecOps - Dependencies install"
     uses: ./.github/workflows/install.yml
     with:
-      reusable_runner_image: "${{ inputs.job_install_deps_runner_image }}"
+      reusable_runner_name: "${{ inputs.globals_runner_name }}"
+      reusable_container_runner_image: "${{ inputs.job_install_deps_container_runner_image }}"
       reusable_package_manager: "${{ inputs.globals_package_manager }}"
       reusable_node_version: "${{ inputs.globals_node_version }}"
-      reusable_install_args: "${{ inputs.job_install_reusable_install_args }}"
 
   # Workflow reference => (Monorepo - NodeJS and ReactJS) Build app
   build_app:
     name: "DevSecOps - Build App"
     uses: ./.github/workflows/build.yml
     with:
-      reusable_runner_image: "${{ inputs.job_build_app_runner_image }}"
+      reusable_runner_name: "${{ inputs.globals_runner_name }}"
+      reusable_container_runner_image: "${{ inputs.job_build_app_container_runner_image }}"
       reusable_package_manager: "${{ inputs.globals_package_manager }}"
       reusable_node_version: "${{ inputs.globals_node_version }}"
-      reusable_build_args: "${{ inputs.job_build_reusable_build_args }}"
+      reusable_build_args: "${{ inputs.job_build_app_build_args }}"
     needs:
       - install_deps
+
+  # Workflow reference => (Monorepo - NodeJS and ReactJS) Build image
+  build_image:
+    name: "DevSecOps - Build Image"
+    uses: ./.github/workflows/build-image.yml
+    with:
+      reusable_runner_name: "${{ inputs.globals_runner_name }}"
+      reusable_package_manager: "${{ inputs.globals_package_manager }}"
+    needs:
+      - build_app
