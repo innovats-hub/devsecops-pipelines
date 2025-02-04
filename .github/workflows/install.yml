@@ -84,7 +84,6 @@ jobs:
         with:
           path: |
             '**/node_modules'
-            '**/package-lock.json'
           key: ${{ github.run_id }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ github.ref }}-${{ github.run_id }}-npm-
@@ -96,7 +95,6 @@ jobs:
         with:
           path: |
             '**/node_modules'
-            '**/yarn.lock'
           key: ${{ github.run_id }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ github.ref }}-${{ github.run_id }}-yarn-
