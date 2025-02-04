@@ -58,9 +58,7 @@ jobs:
         if: ${{ inputs.reusable_package_manager == 'npm' }}
         uses: actions/cache@v4
         with:
-          path: |
-            '**/node_modules'
-            '**/package-lock.json'
+          path: '**/node_modules'
           key: ${{ github.run_id }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ github.ref }}-${{ github.run_id }}-npm-
@@ -69,9 +67,7 @@ jobs:
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
         uses: actions/cache@v4
         with:
-          path: |
-            '**/node_modules'
-            '**/yarn.lock'
+          path: '**/node_modules'
           key: ${{ github.run_id }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ github.ref }}-${{ github.run_id }}-yarn-
