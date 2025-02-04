@@ -62,7 +62,7 @@ jobs:
       reusable_package_manager: "${{ inputs.globals_package_manager }}"
       reusable_node_version: "${{ inputs.globals_node_version }}"
       reusable_build_args: "${{ inputs.job_build_app_build_args }}"
-      reusable_build_path: "${{ inputs.job_build_app_build_path }}"
+      reusable_build_path: "${{ inputs.job_build_app_path_compress_build }}"
     needs:
       - install_deps
 
