@@ -53,7 +53,7 @@ jobs:
 
       - name: Extract build
         run: |
-          tar -xzf build.tar.gz -C ${{ inputs.reusable_path_extract_build }}
+          tar -xzf build.tar.gz ${{ inputs.reusable_path_extract_build }}
 
       - name: List compress build
         run: |
