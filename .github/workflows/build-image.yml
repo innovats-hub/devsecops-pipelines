@@ -55,19 +55,25 @@ jobs:
         run: |
           tar -xzf build.tar.gz -C ${{ inputs.reusable_path_extract_build }}
 
-      # Temporary
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      - name: List compress build
+        run: |
+          ls -lha "packages/backend/"
+          echo "---------------"
+          ls -lha "packages/backend/dist"
 
-      - name: Build Docker image
-        run: docker build -t ${{ inputs.reusable_name_app }}:${{ inputs.reusable_version_app }} .
+      # # Temporary
+      # - name: Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@v2
 
-      - name: Save Docker image
-        run: docker save -o image-app.tar ${{ inputs.reusable_name_app }}:${{ inputs.reusable_version_app }}
+      # - name: Build Docker image
+      #   run: docker build -t ${{ inputs.reusable_name_app }}:${{ inputs.reusable_version_app }} .
 
-      - name: Upload artifact image
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ github.run_id }}-image-${{ github.sha }}
-          path: image-app.tar
-          retention-days: 1
+      # - name: Save Docker image
+      #   run: docker save -o image-app.tar ${{ inputs.reusable_name_app }}:${{ inputs.reusable_version_app }}
+
+      # - name: Upload artifact image
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ${{ github.run_id }}-image-${{ github.sha }}
+      #     path: image-app.tar
+      #     retention-days: 1
