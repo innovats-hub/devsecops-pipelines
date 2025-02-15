@@ -25,6 +25,10 @@ on:
         description: 'Declare version app for build and deploy'
         required: true
         type: string
+      reusable_path_extract_build:
+        description: 'Path to extract the build'
+        required: false 
+        type: string
 
 jobs:
   # Clean and checkout repositories. Clean workspace is enabled by default
@@ -49,7 +53,7 @@ jobs:
 
       - name: Extract build (npm)
         run: |
-          tar -xzf build.tar.gz
+          tar -xzf build.tar.gz -C ${{ inputs.reusable_path_extract_build }}
 
       - name: Build Docker image
         run: docker build -t ${{ inputs.reusable_name_app }}:${{ inputs.reusable_version_app }} .

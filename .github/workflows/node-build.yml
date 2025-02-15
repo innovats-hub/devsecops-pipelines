@@ -29,6 +29,10 @@ on:
         description: 'Declare version app for build and deploy'
         required: true
         type: string
+      reusable_path_compress_build:
+        description: 'Path of build to compress'
+        required: false
+        type: string
 
 jobs:
   # Clean and checkout repositories. Clean workspace is enabled by default
@@ -86,13 +90,13 @@ jobs:
         if: ${{ inputs.reusable_package_manager == 'npm' }}
         run: |
           npm ${{ inputs.reusable_build_args }}
-          tar -czf build.tar.gz build
+          tar -czf build.tar.gz build ${{ inputs.reusable_path_compress_build }}
 
       - name: Build (yarn)
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
         run: |
           yarn ${{ inputs.reusable_build_args }}"
-          tar -czf build.tar.gz build
+          tar -czf build.tar.gz build ${{ inputs.reusable_path_compress_build }}
 
       - name: Upload artifact build
         uses: actions/upload-artifact@v4

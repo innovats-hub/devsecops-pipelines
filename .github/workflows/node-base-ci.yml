@@ -42,6 +42,11 @@ on:
       #   description: 'Declare container runner image to steps'
       #   required: true
       #   type: string
+      job_build_app_path_compress_build:
+        description: 'Path of build to compress'
+        required: false
+        default: "build"
+        type: string
       job_build_app_build_args:
         description: 'Arguments of build to use'
         required: true
@@ -52,6 +57,11 @@ on:
       #   description: 'Declare container runner image to steps'
       #   required: true
       #   type: string
+      job_build_image_path_extract_build:
+        description: 'Path to extract the build'
+        required: false
+        default: "./"
+        type: string
 
       # build_helm
       # job_build_helm_container_runner_image:
@@ -121,6 +131,7 @@ jobs:
       reusable_node_version: "${{ inputs.globals_node_version }}"
       reusable_build_args: "${{ inputs.job_build_app_build_args }}"
       reusable_version_app: "${{ inputs.globals_version_app }}"
+      reusable_path_compress_build: "${{ inputs.job_build_app_path_compress_build }}"
     needs:
       - install_deps
 
@@ -134,6 +145,7 @@ jobs:
       reusable_package_manager: "${{ inputs.globals_package_manager }}"
       reusable_name_app: "${{ inputs.globals_name_app }}"
       reusable_version_app: "${{ inputs.globals_version_app }}"
+      reusable_path_extract_build: "${{ inputs.job_build_image_path_extract_build }}"
     needs:
       - build_app
 
@@ -149,36 +161,36 @@ jobs:
     needs:
       - build_image
 
-  # Workflow reference => (NodeJS) Upload Artifacts
-  upload_artifacts:
-    name: "DevSecOps - Upload Artifacts"
-    uses: ./.github/workflows/uploads.yml
-    with:
-      reusable_runner_name: "${{ inputs.globals_runner_name }}"
-      # reusable_container_runner_image: "${{ inputs.job_upload_artifacts_container_runner_image }}"
-      reusable_docker_registry_url: "${{ inputs.job_upload_artifacts_docker_registry_url }}"
-      reusable_helm_repository_url: "${{ inputs.job_upload_artifacts_helm_repository_url }}"
-      reusable_name_app: "${{ inputs.globals_name_app }}"
-      reusable_version_app: "${{ inputs.globals_version_app }}"
-    secrets:
-      reusable_docker_registry_username: "${{ secrets.job_upload_artifacts_docker_registry_username }}"
-      reusable_docker_registry_password: "${{ secrets.job_upload_artifacts_docker_registry_password }}"
-      reusable_helm_repository_username: "${{ secrets.job_upload_artifacts_helm_repository_username }}"
-      reusable_helm_repository_password: "${{ secrets.job_upload_artifacts_helm_repository_password }}"
-    needs:
-      - build_image
-      - build_helm
+  # # Workflow reference => (NodeJS) Upload Artifacts
+  # upload_artifacts:
+  #   name: "DevSecOps - Upload Artifacts"
+  #   uses: ./.github/workflows/uploads.yml
+  #   with:
+  #     reusable_runner_name: "${{ inputs.globals_runner_name }}"
+  #     # reusable_container_runner_image: "${{ inputs.job_upload_artifacts_container_runner_image }}"
+  #     reusable_docker_registry_url: "${{ inputs.job_upload_artifacts_docker_registry_url }}"
+  #     reusable_helm_repository_url: "${{ inputs.job_upload_artifacts_helm_repository_url }}"
+  #     reusable_name_app: "${{ inputs.globals_name_app }}"
+  #     reusable_version_app: "${{ inputs.globals_version_app }}"
+  #   secrets:
+  #     reusable_docker_registry_username: "${{ secrets.job_upload_artifacts_docker_registry_username }}"
+  #     reusable_docker_registry_password: "${{ secrets.job_upload_artifacts_docker_registry_password }}"
+  #     reusable_helm_repository_username: "${{ secrets.job_upload_artifacts_helm_repository_username }}"
+  #     reusable_helm_repository_password: "${{ secrets.job_upload_artifacts_helm_repository_password }}"
+  #   needs:
+  #     - build_image
+  #     - build_helm
 
-  # Workflow reference => (NodeJS) Update application
-  upload_application:
-    name: "DevSecOps - Upload Application ArgoCD"
-    uses: ./.github/workflows/application.yml
-    with:
-      reusable_runner_name: "${{ inputs.globals_runner_name }}"
-      # reusable_container_runner_image: "${{ inputs.job_upload_application_container_runner_image }}"
-      reusable_name_app: "${{ inputs.globals_name_app }}"
-      reusable_version_app: "${{ inputs.globals_version_app }}"
-    secrets:
-      reusable_kube_config_data: "${{ secrets.job_upload_application_kube_config_data }}"
-    needs:
-      - upload_artifacts
+  # # Workflow reference => (NodeJS) Update application
+  # update_application:
+  #   name: "DevSecOps - Deploy/Update Application ArgoCD"
+  #   uses: ./.github/workflows/application.yml
+  #   with:
+  #     reusable_runner_name: "${{ inputs.globals_runner_name }}"
+  #     # reusable_container_runner_image: "${{ inputs.job_upload_application_container_runner_image }}"
+  #     reusable_name_app: "${{ inputs.globals_name_app }}"
+  #     reusable_version_app: "${{ inputs.globals_version_app }}"
+  #   secrets:
+  #     reusable_kube_config_data: "${{ secrets.job_upload_application_kube_config_data }}"
+  #   needs:
+  #     - upload_artifacts
