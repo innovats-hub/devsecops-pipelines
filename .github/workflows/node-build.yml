@@ -92,7 +92,11 @@ jobs:
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
         run: |
           yarn ${{ inputs.reusable_build_args }}
-          tar -czf build.tar.gz build ${{ inputs.reusable_path_compress_build }}
+          echo "------- raiz -------"
+          ls -lha
+          echo "------- dist -------"
+          ls -lha packages/backend/dist
+        #tar -czf build.tar.gz build ${{ inputs.reusable_path_compress_build }}
 
       - name: Upload artifact build
         uses: actions/upload-artifact@v4
