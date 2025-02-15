@@ -51,7 +51,7 @@ jobs:
         with:
           name: ${{ github.run_id }}-build-${{ github.sha }}
 
-      - name: Extract build (npm)
+      - name: Extract build
         run: |
           tar -xzf build.tar.gz -C ${{ inputs.reusable_path_extract_build }}
 
