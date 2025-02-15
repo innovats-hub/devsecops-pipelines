@@ -135,19 +135,19 @@ jobs:
     needs:
       - install_deps
 
-  # # Workflow reference => (NodeJS) Build image
-  # build_image:
-  #   name: "DevSecOps - Build Image"
-  #   uses: ./.github/workflows/build-image.yml
-  #   with:
-  #     reusable_runner_name: "${{ inputs.globals_runner_name }}"
-  #     # reusable_container_runner_image: "${{ inputs.job_build_image_container_runner_image }}"
-  #     reusable_package_manager: "${{ inputs.globals_package_manager }}"
-  #     reusable_name_app: "${{ inputs.globals_name_app }}"
-  #     reusable_version_app: "${{ inputs.globals_version_app }}"
-  #     reusable_path_extract_build: "${{ inputs.job_build_image_path_extract_build }}"
-  #   needs:
-  #     - build_app
+  # Workflow reference => (NodeJS) Build image
+  build_image:
+    name: "DevSecOps - Build Image"
+    uses: ./.github/workflows/build-image.yml
+    with:
+      reusable_runner_name: "${{ inputs.globals_runner_name }}"
+      # reusable_container_runner_image: "${{ inputs.job_build_image_container_runner_image }}"
+      reusable_package_manager: "${{ inputs.globals_package_manager }}"
+      reusable_name_app: "${{ inputs.globals_name_app }}"
+      reusable_version_app: "${{ inputs.globals_version_app }}"
+      reusable_path_extract_build: "${{ inputs.job_build_image_path_extract_build }}"
+    needs:
+      - build_app
 
   # # Workflow reference => (NodeJS) Build chart
   # build_helm:
