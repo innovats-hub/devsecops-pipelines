@@ -1,28 +1,38 @@
 # Name workflow in pipeline
-name: (Monorepo - NodeJS and ReactJS) Build image
+name: (NodeJS) Build image
 
 # Workflow sharing policy
 on:
   workflow_call:
     inputs:
-      reusable_runner_image:
+      reusable_runner_name:
         description: 'Declare runner name to steps'
         required: true
         type: string
+      # reusable_container_runner_image:
+      #   description: 'Declare container runner image to steps'
+      #   required: true
+      #   type: string
       reusable_package_manager:
         description: 'Declare the package manager as used, yarn or npm'
         required: true
         type: string
-      reusable_path_extract_build:
-        description: 'Path to extract the build'
-        required: false 
+      reusable_name_app:
+        description: 'Declare name app for build and deploy'
+        required: true
+        type: string
+      reusable_version_app:
+        description: 'Declare version app for build and deploy'
+        required: true
         type: string
 
 jobs:
   # Clean and checkout repositories. Clean workspace is enabled by default
   reusable_build_image:
     name: Build container image
-    runs-on: ${{ inputs.reusable_runner_image }}
+    runs-on: ${{ inputs.reusable_runner_name }}
+    # container:
+    #   image: ${{ inputs.reusable_container_runner_image }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@v2
@@ -37,23 +47,15 @@ jobs:
         with:
           name: ${{ github.run_id }}-build-${{ github.sha }}
 
-      - name: Extract build
+      - name: Extract build (npm)
         run: |
-          tar -xzf build.tar.gz -C ${{ inputs.reusable_path_extract_build }}
+          tar -xzf build.tar.gz
 
-      - name: Install Buildah
-        run: |
-          wget https://github.com/containers/buildah/releases/latest/download/buildah-linux-amd64 -O buildah
-          chmod +x buildah
-          sudo mv buildah /usr/local/bin/
+      - name: Build Docker image
+        run: docker build -t ${{ inputs.reusable_name_app }}:${{ inputs.reusable_version_app }} .
 
-      - name: Build image
-        run: |
-          buildah --storage-driver vfs bud --format docker -t ${{ github.repository }}:latest .
-
-      - name: Save image
-        run: |
-          buildah push --storage-driver vfs localhost/${{ github.repository }}:latest oci-archive:image-app.tar
+      - name: Save Docker image
+        run: docker save -o image-app.tar ${{ inputs.reusable_name_app }}:${{ inputs.reusable_version_app }}
 
       - name: Upload artifact image
         uses: actions/upload-artifact@v4

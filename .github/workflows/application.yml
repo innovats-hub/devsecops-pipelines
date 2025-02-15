@@ -1,0 +1,75 @@
+name: (NodeJS) Update application
+
+# Policies run job in branches
+on:
+  workflow_call:
+    inputs:
+      reusable_runner_name:
+        description: 'Declare runner name to steps'
+        required: true
+        type: string
+      # reusable_container_runner_image:
+      #   description: 'Declare container runner image to steps'
+      #   required: true
+      #   type: string
+      reusable_name_app:
+        description: 'Declare name app for build and deploy'
+        required: true
+        type: string
+      reusable_version_app:
+        description: 'Declare version app for build and deploy'
+        required: true
+        type: string
+
+    secrets:
+      reusable_kube_config_data:
+        description: 'Kube Config for accessing cluster kubernetes'
+        required: true
+
+jobs:
+  # Clean and checkout repositories. Clean workspace is enabled by default
+  reusable_update_application:
+    name: Update application
+    runs-on: ${{ inputs.reusable_runner_name }}
+    # container:
+    #   image: ${{ inputs.reusable_container_runner_image }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Checkout ArgoCD application template repository
+        uses: actions/checkout@v4
+        with:
+          repository: innovats-hub/argocd-applications
+          path: argocd-template
+
+      - name: Setup version app
+        run: |
+          sed -i 's/NAME_APP/${{ inputs.reusable_name_app }}/g' ./argocd-template/app-sample/application.yaml
+          sed -i 's/VERSION_APP/${{ inputs.reusable_version_app }}/g' ./argocd-template/app-sample/application.yaml
+
+      - name: Set up Kubernetes CLI
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.31.0'
+
+      - name: Set up Kubeconfig
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.reusable_kube_config_data }}
+
+      - name: Deploy/Update application in ArgoCD
+        uses: azure/k8s-deploy@v4
+        with:
+          namespace: argocd
+          manifests: |
+            argocd-template/app-sample/project.yaml
+            argocd-template/app-sample/application.yaml
+          images: |
+            docker:latest

@@ -1,0 +1,184 @@
+name: (NodeJS) pipeline base CI
+
+# Policies run job in branches
+on:
+  workflow_call:
+    inputs:
+      # Globals
+      globals_node_version:
+        description: 'Version of nodeJS to use'
+        required: true
+        type: string
+      globals_package_manager:
+        description: 'Declare the package manager as used, yarn or npm'
+        required: true
+        type: string
+      globals_runner_name:
+        description: 'Declare runner name to steps'
+        required: true
+        type: string
+      globals_name_app:
+        description: 'Declare name app for build and deploy'
+        required: true
+        type: string
+      globals_version_app:
+        description: 'Declare version app for build and deploy'
+        required: true
+        type: string
+
+      # install_deps
+      # job_install_deps_container_runner_image:
+      #   description: 'Declare container runner image to steps'
+      #   required: true
+      #   type: string
+      job_install_deps_install_args:
+        description: 'Arguments of install to use'
+        required: false
+        default: "install"
+        type: string
+
+      # build_app
+      # job_build_app_container_runner_image:
+      #   description: 'Declare container runner image to steps'
+      #   required: true
+      #   type: string
+      job_build_app_build_args:
+        description: 'Arguments of build to use'
+        required: true
+        type: string
+
+      # build_image
+      # job_build_image_container_runner_image:
+      #   description: 'Declare container runner image to steps'
+      #   required: true
+      #   type: string
+
+      # build_helm
+      # job_build_helm_container_runner_image:
+      #   description: 'Declare container runner image to steps'
+      #   required: true
+      #   type: string
+
+      # upload_artifacts
+      # job_upload_artifacts_container_runner_image:
+      #   description: 'Declare container runner image to steps'
+      #   required: true
+      #   type: string
+      job_upload_artifacts_docker_registry_url:
+        description: 'URL of the Docker registry where images are stored'
+        required: true
+        type: string
+      job_upload_artifacts_helm_repository_url:
+        description: 'URL of the Helm repository where images are stored'
+        required: true
+        type: string
+
+      # upload_application
+      # job_upload_application_container_runner_image:
+      #   description: 'Declare container runner image to steps'
+      #   required: true
+      #   type: string
+
+    secrets:
+      # upload_artifacts
+      job_upload_artifacts_docker_registry_username:
+        description: 'Username for accessing the Docker registry'
+        required: true
+      job_upload_artifacts_docker_registry_password:
+        description: 'Password for accessing the Docker registry'
+        required: true
+      job_upload_artifacts_helm_repository_username:
+        description: 'Username for accessing the Helm repository'
+        required: true
+      job_upload_artifacts_helm_repository_password:
+        description: 'Password for accessing the Helm repository'
+        required: true
+
+      # upload_application
+      job_upload_application_kube_config_data:
+        description: 'Kube Config for accessing cluster kubernetes'
+        required: true
+
+jobs:
+  # Workflow reference => (NodeJS) Install deps and Lint
+  install_deps:
+    name: "DevSecOps - Dependencies install"
+    uses: ./.github/workflows/node-install.yml
+    with:
+      reusable_runner_name: "${{ inputs.globals_runner_name }}"
+      # reusable_container_runner_image: "${{ inputs.job_install_deps_container_runner_image }}"
+      reusable_package_manager: "${{ inputs.globals_package_manager }}"
+      reusable_node_version: "${{ inputs.globals_node_version }}"
+
+  # Workflow reference => (NodeJS) Build app
+  build_app:
+    name: "DevSecOps - Build App"
+    uses: ./.github/workflows/node-build.yml
+    with:
+      reusable_runner_name: "${{ inputs.globals_runner_name }}"
+      # reusable_container_runner_image: "${{ inputs.job_build_app_container_runner_image }}"
+      reusable_package_manager: "${{ inputs.globals_package_manager }}"
+      reusable_node_version: "${{ inputs.globals_node_version }}"
+      reusable_build_args: "${{ inputs.job_build_app_build_args }}"
+      reusable_version_app: "${{ inputs.globals_version_app }}"
+    needs:
+      - install_deps
+
+  # Workflow reference => (NodeJS) Build image
+  build_image:
+    name: "DevSecOps - Build Image"
+    uses: ./.github/workflows/build-image.yml
+    with:
+      reusable_runner_name: "${{ inputs.globals_runner_name }}"
+      # reusable_container_runner_image: "${{ inputs.job_build_image_container_runner_image }}"
+      reusable_package_manager: "${{ inputs.globals_package_manager }}"
+      reusable_name_app: "${{ inputs.globals_name_app }}"
+      reusable_version_app: "${{ inputs.globals_version_app }}"
+    needs:
+      - build_app
+
+  # Workflow reference => (NodeJS) Build chart
+  build_helm:
+    name: "DevSecOps - Build Helm Chart"
+    uses: ./.github/workflows/build-chart.yml
+    with:
+      reusable_runner_name: "${{ inputs.globals_runner_name }}"
+      # reusable_container_runner_image: "${{ inputs.job_build_helm_container_runner_image }}"
+      reusable_name_app: "${{ inputs.globals_name_app }}"
+      reusable_version_app: "${{ inputs.globals_version_app }}"
+    needs:
+      - build_image
+
+  # Workflow reference => (NodeJS) Upload Artifacts
+  upload_artifacts:
+    name: "DevSecOps - Upload Artifacts"
+    uses: ./.github/workflows/uploads.yml
+    with:
+      reusable_runner_name: "${{ inputs.globals_runner_name }}"
+      # reusable_container_runner_image: "${{ inputs.job_upload_artifacts_container_runner_image }}"
+      reusable_docker_registry_url: "${{ inputs.job_upload_artifacts_docker_registry_url }}"
+      reusable_helm_repository_url: "${{ inputs.job_upload_artifacts_helm_repository_url }}"
+      reusable_name_app: "${{ inputs.globals_name_app }}"
+      reusable_version_app: "${{ inputs.globals_version_app }}"
+    secrets:
+      reusable_docker_registry_username: "${{ secrets.job_upload_artifacts_docker_registry_username }}"
+      reusable_docker_registry_password: "${{ secrets.job_upload_artifacts_docker_registry_password }}"
+      reusable_helm_repository_username: "${{ secrets.job_upload_artifacts_helm_repository_username }}"
+      reusable_helm_repository_password: "${{ secrets.job_upload_artifacts_helm_repository_password }}"
+    needs:
+      - build_image
+      - build_helm
+
+  # Workflow reference => (NodeJS) Update application
+  upload_application:
+    name: "DevSecOps - Upload Application ArgoCD"
+    uses: ./.github/workflows/application.yml
+    with:
+      reusable_runner_name: "${{ inputs.globals_runner_name }}"
+      # reusable_container_runner_image: "${{ inputs.job_upload_application_container_runner_image }}"
+      reusable_name_app: "${{ inputs.globals_name_app }}"
+      reusable_version_app: "${{ inputs.globals_version_app }}"
+    secrets:
+      reusable_kube_config_data: "${{ secrets.job_upload_application_kube_config_data }}"
+    needs:
+      - upload_artifacts

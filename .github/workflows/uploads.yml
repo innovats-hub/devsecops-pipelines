@@ -1,0 +1,117 @@
+name: (NodeJS) Push Image and upload Artifacts
+
+# Policies run job in branches
+on:
+  workflow_call:
+    inputs:
+      reusable_runner_name:
+        description: 'Declare runner name to steps'
+        required: true
+        type: string
+      # reusable_container_runner_image:
+      #   description: 'Declare container runner image to steps'
+      #   required: true
+      #   type: string
+      reusable_docker_registry_url:
+        description: 'URL of the Docker registry where images are stored'
+        required: true
+        type: string
+      reusable_helm_repository_url:
+        description: 'URL of the Helm repository where images are stored'
+        required: true
+        type: string
+      reusable_name_app:
+        description: 'Declare name app for build and deploy'
+        required: true
+        type: string
+      reusable_version_app:
+        description: 'Declare version app for build and deploy'
+        required: true
+        type: string
+
+    secrets:
+      reusable_docker_registry_username:
+        description: 'Username for accessing the Docker registry'
+        required: true
+      reusable_docker_registry_password:
+        description: 'Password for accessing the Docker registry'
+        required: true
+      reusable_helm_repository_username:
+        description: 'Username for accessing the Helm repository'
+        required: true
+      reusable_helm_repository_password:
+        description: 'Password for accessing the Helm repository'
+        required: true
+
+jobs:
+  reusable_push_image_container:
+    name: Push container image
+    runs-on: ${{ inputs.reusable_runner_name }}
+    # container:
+    #   image: ${{ inputs.reusable_container_runner_image }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download artifact image
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ github.run_id }}-image-${{ github.sha }}
+
+      - name: Login Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ inputs.reusable_docker_registry_url }}
+          username: ${{ secrets.reusable_docker_registry_username }}
+          password: ${{ secrets.reusable_docker_registry_password }}
+          logout: true
+
+      - name: Load Docker image
+        run: docker load -i ./image-app.tar
+
+      - name: Load Docker image
+        run: docker image ls
+
+      - name: Tag Docker image
+        run: docker tag ${{ inputs.reusable_name_app }}:${{ inputs.reusable_version_app }} ${{ inputs.reusable_docker_registry_url }}/image/${{ inputs.reusable_name_app }}:${{ inputs.reusable_version_app }}
+
+      - name: Push Docker image
+        run: docker push ${{ inputs.reusable_docker_registry_url }}/image/${{ inputs.reusable_name_app }}:${{ inputs.reusable_version_app }}
+      
+  reusable_upload_helm_chart_package:
+    name: Upload helm chart package
+    runs-on: ${{ inputs.reusable_runner_name }}
+    # container:
+    #   image: ${{ inputs.reusable_container_runner_image }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download artifact chart
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ github.run_id }}-chart-${{ github.sha }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.16.3
+
+      - name: Login helm repository
+        run: |
+          echo ${{ secrets.reusable_helm_repository_password }} | helm registry login ${{ inputs.reusable_helm_repository_url }} --username ${{ secrets.reusable_helm_repository_username }} --password-stdin
+
+      - name: Push Helm Chart
+        run: helm push ${{ inputs.reusable_name_app }}-${{ inputs.reusable_version_app }}.tgz ${{ inputs.reusable_helm_repository_url }}/helm
+    needs:
+      - reusable_push_image_container

@@ -1,14 +1,18 @@
 # Name workflow in pipeline
-name: (Monorepo - NodeJS and ReactJS) Build app
+name: (NodeJS) Build app
 
 # Workflow sharing policy
 on:
   workflow_call:
     inputs:
-      reusable_runner_image:
-        description: 'Declare runner image to steps'
+      reusable_runner_name:
+        description: 'Declare runner name to steps'
         required: true
         type: string
+      # reusable_container_runner_image:
+      #   description: 'Declare container runner image to steps'
+      #   required: true
+      #   type: string
       reusable_package_manager:
         description: 'Declare the package manager as used, yarn or npm'
         required: true
@@ -17,12 +21,12 @@ on:
         description: 'Version of nodeJS to use'
         required: true
         type: string
-      reusable_path_compress_build:
-        description: 'Path of build to compress'
-        required: false
-        type: string
       reusable_build_args:
         description: 'Arguments of build to use'
+        required: true
+        type: string
+      reusable_version_app:
+        description: 'Declare version app for build and deploy'
         required: true
         type: string
 
@@ -30,13 +34,15 @@ jobs:
   # Clean and checkout repositories. Clean workspace is enabled by default
   reusable_build_app:
     name: Code build
-    runs-on: ${{ inputs.reusable_runner_image }}
+    runs-on: ${{ inputs.reusable_runner_name }}
+    # container:
+    #   image: ${{ inputs.reusable_container_runner_image }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@v2
         with:
           egress-policy: audit
-          
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -61,7 +67,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ github.run_id }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ github.ref }}-${{ github.run_id }}-npm-
+            ${{ github.run_id }}-npm-
 
       - name: Restore cache dependencies (yarn)
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
@@ -70,19 +76,23 @@ jobs:
           path: '**/node_modules'
           key: ${{ github.run_id }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ github.ref }}-${{ github.run_id }}-yarn-
+            ${{ github.run_id }}-yarn-
+
+      - name: Setup version app
+        run: |
+          sed -i 's/VERSION_APP/${{ inputs.reusable_version_app }}/g' ./public/index.html
 
       - name: Build (npm)
         if: ${{ inputs.reusable_package_manager == 'npm' }}
         run: |
           npm ${{ inputs.reusable_build_args }}
-          tar -czf build.tar.gz ${{ inputs.reusable_path_compress_build }}
+          tar -czf build.tar.gz build
 
       - name: Build (yarn)
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
         run: |
-          yarn ${{ inputs.reusable_build_args }}
-          tar -czf build.tar.gz ${{ inputs.reusable_path_compress_build }}
+          yarn ${{ inputs.reusable_build_args }}"
+          tar -czf build.tar.gz build
 
       - name: Upload artifact build
         uses: actions/upload-artifact@v4

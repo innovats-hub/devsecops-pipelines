@@ -1,14 +1,18 @@
 # Name workflow in pipeline
-name: (Monorepo - NodeJS and ReactJS) Install deps and Lint
+name: (NodeJS) Install deps and Lint
 
 # Workflow sharing policy
 on:
   workflow_call:
     inputs:
-      reusable_runner_image:
-        description: 'Declare runner image to steps'
+      reusable_runner_name:
+        description: 'Declare runner name to steps'
         required: true
         type: string
+      # reusable_container_runner_image:
+      #   description: 'Declare container runner image to steps'
+      #   required: true
+      #   type: string
       reusable_package_manager:
         description: 'Declare the package manager as used, yarn or npm'
         required: true
@@ -26,13 +30,15 @@ jobs:
   # Specific environment settings
   reusable_config_environment:
     name: "Configure environment"
-    runs-on: ${{ inputs.reusable_runner_image }}
+    runs-on: ${{ inputs.reusable_runner_name }}
+    # container:
+    #   image: ${{ inputs.reusable_container_runner_image }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@v2
         with:
           egress-policy: audit
-          
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -51,7 +57,9 @@ jobs:
   # Installation of dependencies for building the application
   reusable_install_dependencies:
     name: Node install dependencies
-    runs-on: ${{ inputs.reusable_runner_image }}
+    runs-on: ${{ inputs.reusable_runner_name }}
+    # container:
+    #   image: ${{ inputs.reusable_container_runner_image }}
     needs:
       - reusable_config_environment
     steps:
@@ -85,7 +93,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ github.run_id }}-npm-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ github.ref }}-${{ github.run_id }}-npm-
+            ${{ github.run_id }}-npm-
 
       - name: Cache dependencies (yarn)
         if: ${{ inputs.reusable_package_manager == 'yarn' }}
@@ -95,7 +103,7 @@ jobs:
           path: '**/node_modules'
           key: ${{ github.run_id }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ github.ref }}-${{ github.run_id }}-yarn-
+            ${{ github.run_id }}-yarn-
 
       - name: Install dependencies (npm)
         if: ${{ inputs.reusable_package_manager == 'npm' }}

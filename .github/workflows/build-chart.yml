@@ -1,0 +1,72 @@
+name: (NodeJS) Build chart
+
+# Policies run job in branches
+on:
+  workflow_call:
+    inputs:
+      reusable_runner_name:
+        description: 'Declare runner name to steps'
+        required: true
+        type: string
+      # reusable_container_runner_image:
+      #   description: 'Declare container runner image to steps'
+      #   required: true
+      #   type: string
+      reusable_name_app:
+        description: 'Declare name app for build and deploy'
+        required: true
+        type: string
+      reusable_version_app:
+        description: 'Declare version app for build and deploy'
+        required: true
+        type: string
+
+jobs:
+  # Clean and checkout repositories. Clean workspace is enabled by default
+  reusable_build_chart:
+    name: Build chart
+    runs-on: ${{ inputs.reusable_runner_name }}
+    # container:
+    #   image: ${{ inputs.reusable_container_runner_image }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Checkout Helm template repository
+        uses: actions/checkout@v4
+        with:
+          repository: innovats-hub/helm-charts
+          path: chart-template
+
+      - name: Generate chart app
+        run: cp -rfp ./chart-template/app-sample ./chart-template/${{ inputs.reusable_name_app }}
+
+      - name: Setup version app
+        run: |
+          sed -i 's/VERSION_APP/${{ inputs.reusable_version_app }}/g' ./chart-template/${{ inputs.reusable_name_app }}/Chart.yaml
+          sed -i 's/NAME_APP/${{ inputs.reusable_name_app }}/g' ./chart-template/${{ inputs.reusable_name_app }}/Chart.yaml
+          sed -i 's/NAME_APP/${{ inputs.reusable_name_app }}/g' ./chart-template/${{ inputs.reusable_name_app }}/templates/_helpers.tpl
+          sed -i 's/NAME_APP/${{ inputs.reusable_name_app }}/g' ./chart-template/${{ inputs.reusable_name_app }}/templates/NOTES.txt
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.16.3
+
+      - name: Helm lint
+        run: helm lint ./chart-template/${{ inputs.reusable_name_app }}
+
+      - name: Package Helm chart
+        run: helm package ./chart-template/${{ inputs.reusable_name_app }}
+
+      - name: Upload artifact chart
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.run_id }}-chart-${{ github.sha }}
+          path: ${{ inputs.reusable_name_app }}-${{ inputs.reusable_version_app }}.tgz
+          retention-days: 1
