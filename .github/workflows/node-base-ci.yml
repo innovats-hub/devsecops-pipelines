@@ -57,11 +57,6 @@ on:
       #   description: 'Declare container runner image to steps'
       #   required: true
       #   type: string
-      job_build_image_path_extract_build:
-        description: 'Path to extract the build'
-        required: false
-        default: "./"
-        type: string
 
       # build_helm
       # job_build_helm_container_runner_image:
@@ -145,7 +140,7 @@ jobs:
       reusable_package_manager: "${{ inputs.globals_package_manager }}"
       reusable_name_app: "${{ inputs.globals_name_app }}"
       reusable_version_app: "${{ inputs.globals_version_app }}"
-      reusable_path_extract_build: "${{ inputs.job_build_image_path_extract_build }}"
+      reusable_path_extract_build: "${{ inputs.job_build_app_path_compress_build }}"
     needs:
       - build_app
 
